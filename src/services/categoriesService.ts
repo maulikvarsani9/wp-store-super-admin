@@ -13,8 +13,9 @@ export const categoriesService = {
       apiEndpoints.categories.getAll,
       params
     );
-    // Handle nested data structure from backend
-    return response.data?.data || response.data;
+    // Backend returns: { success, message, data: { categories, pagination } }
+    // apiClient.get returns response.data, so we need response.data (which is the data object)
+    return response.data;
   },
 
   // Get category by ID
