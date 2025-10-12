@@ -163,9 +163,26 @@ export const apiEndpoints = {
     delete: (id: string) => `/categories/${id}`,
   },
 
+  authors: {
+    getAll: '/admin/authors',
+    getById: (id: string) => `/admin/authors/${id}`,
+    create: '/admin/authors',
+    update: (id: string) => `/admin/authors/${id}`,
+    delete: (id: string) => `/admin/authors/${id}`,
+  },
+
+  blogs: {
+    getAll: '/admin/blogs',
+    getById: (id: string) => `/admin/blogs/${id}`,
+    create: '/admin/blogs',
+    update: (id: string) => `/admin/blogs/${id}`,
+    delete: (id: string) => `/admin/blogs/${id}`,
+  },
+
   uploads: {
     single: '/uploads/single',
     multiple: '/uploads/multiple',
+    blogImage: '/admin/blog-upload',
   },
 };
 

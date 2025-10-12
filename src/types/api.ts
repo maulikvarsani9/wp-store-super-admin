@@ -1,7 +1,8 @@
 export interface User {
   _id: string;
   name: string;
-  email: string;
+  email?: string;
+  phone?: string;
   role: 'superadmin' | 'admin' | 'merchant' | 'user';
   isActive: boolean;
   createdAt: string;
@@ -32,7 +33,8 @@ export interface CategoriesResponse {
 }
 
 export interface LoginRequest {
-  email: string;
+  phone?: string;
+  email?: string;
   password: string;
 }
 
@@ -46,5 +48,49 @@ export interface ApiError {
   message: string;
   code?: string;
   status?: number;
+}
+
+export interface Author {
+  _id: string;
+  name: string;
+  image?: string;
+  createdAt: string;
+  updatedAt: string;
+}
+
+export interface AuthorsResponse {
+  authors: Author[];
+  pagination: {
+    total: number;
+    page: number;
+    limit: number;
+    totalPages: number;
+  };
+}
+
+export interface Blog {
+  _id: string;
+  title: string;
+  slug: string;
+  content: string;
+  mainImage: string;
+  coverImage: string;
+  author: {
+    _id: string;
+    name: string;
+    image?: string;
+  } | string;
+  createdAt: string;
+  updatedAt: string;
+}
+
+export interface BlogsResponse {
+  blogs: Blog[];
+  pagination: {
+    total: number;
+    page: number;
+    limit: number;
+    totalPages: number;
+  };
 }
 

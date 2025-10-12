@@ -2,6 +2,7 @@ import { create } from 'zustand';
 import { persist } from 'zustand/middleware';
 import type { User } from '../types/api';
 import { apiClient, apiEndpoints } from '../lib/api';
+import { navigateToLogin } from '../utils/navigation';
 
 interface StoreState {
   // Auth
@@ -100,6 +101,9 @@ export const useStore = create<StoreState>()(
             isAuthenticated: false,
           });
           console.log('Store cleared after logout');
+
+          // Navigate to login page
+          navigateToLogin();
         } catch (error) {
           console.error('Logout error:', error);
           // Clear store state even if there's an error
@@ -109,6 +113,8 @@ export const useStore = create<StoreState>()(
             refreshToken: null,
             isAuthenticated: false,
           });
+          // Navigate to login page even on error
+          navigateToLogin();
         }
       },
 

@@ -41,5 +41,19 @@ export const uploadService = {
       filenames: data?.filenames || [],
     };
   },
+
+  // Upload blog image
+  uploadBlogImage: async (file: File): Promise<string> => {
+    const formData = new FormData();
+    formData.append('image', file); // Backend expects 'image'
+
+    const response = await api.post(apiEndpoints.uploads.blogImage, formData, {
+      headers: {
+        'Content-Type': 'multipart/form-data',
+      },
+    });
+
+    return response.data?.data?.imageUrl || response.data?.imageUrl;
+  },
 };
 

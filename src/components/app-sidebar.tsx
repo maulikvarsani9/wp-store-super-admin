@@ -14,6 +14,8 @@ import {
     FolderTree,
     Shield,
     Settings,
+    Users,
+    BookOpen,
 } from 'lucide-react';
 import { useStore } from '@/store/store';
 
@@ -24,6 +26,18 @@ const data = {
             title: 'Categories',
             icon: FolderTree,
             url: '/categories',
+        },
+        {
+            id: 'authors',
+            title: 'Authors',
+            icon: Users,
+            url: '/authors',
+        },
+        {
+            id: 'blogs',
+            title: 'Blogs',
+            icon: BookOpen,
+            url: '/blogs',
         },
         {
             id: 'settings',

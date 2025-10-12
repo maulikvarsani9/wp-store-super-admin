@@ -28,9 +28,10 @@ const Layout = () => {
         setShowLogoutConfirm(true);
     };
 
-    const confirmLogout = () => {
-        logout();
+    const confirmLogout = async () => {
+        await logout();
         setShowLogoutConfirm(false);
+        navigate('/login', { replace: true });
     };
 
     const cancelLogout = () => {

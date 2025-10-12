@@ -13,6 +13,9 @@ import ProtectedRoute from './components/ProtectedRoute';
 import Layout from './layout/Layout';
 import Login from './pages/Login';
 import Categories from './pages/Categories';
+import Authors from './pages/Authors';
+import BlogList from './pages/BlogList';
+import BlogForm from './pages/BlogForm';
 import Settings from './pages/Settings';
 
 // Create a client
@@ -60,6 +63,10 @@ const AppRoutes: React.FC = () => {
             >
                 <Route index element={<Navigate to="/categories" replace />} />
                 <Route path="categories" element={<Categories />} />
+                <Route path="authors" element={<Authors />} />
+                <Route path="blogs" element={<BlogList />} />
+                <Route path="blogs/add" element={<BlogForm />} />
+                <Route path="blogs/edit/:id" element={<BlogForm />} />
                 <Route path="settings" element={<Settings />} />
             </Route>
         </Routes>
