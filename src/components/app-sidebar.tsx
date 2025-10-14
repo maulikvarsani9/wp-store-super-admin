@@ -17,7 +17,7 @@ import {
     Users,
     BookOpen,
 } from 'lucide-react';
-import { useStore } from '@/store/store';
+// import { useStore } from '@/store/store'; // Removed unused import
 
 const data = {
     navMain: [
@@ -49,7 +49,7 @@ const data = {
 };
 
 export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
-    const { user } = useStore();
+    // const { user } = useStore(); // Removed unused variable
 
     return (
         <Sidebar collapsible="icon" {...props}>

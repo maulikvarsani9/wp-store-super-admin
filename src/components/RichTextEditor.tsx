@@ -2,6 +2,9 @@ import React from 'react';
 import { CKEditor } from '@ckeditor/ckeditor5-react';
 import ClassicEditor from '@ckeditor/ckeditor5-build-classic';
 
+// Type assertion to fix CKEditor compatibility issue
+const Editor = ClassicEditor as any;
+
 interface RichTextEditorProps {
     value: string;
     onChange: (value: string) => void;
@@ -23,7 +26,7 @@ export const RichTextEditor: React.FC<RichTextEditorProps> = ({
     return (
         <div className={`ckeditor-wrapper ${className}`}>
             <CKEditor
-                editor={ClassicEditor}
+                editor={Editor}
                 data={value}
                 onChange={(_event, editor) => {
                     const data = editor.getData();

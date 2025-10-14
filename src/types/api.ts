@@ -3,6 +3,7 @@ export interface User {
   name: string;
   email?: string;
   phone?: string;
+  profilePicture?: string; // Added missing property
   role: 'superadmin' | 'admin' | 'merchant' | 'user';
   isActive: boolean;
   createdAt: string;

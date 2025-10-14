@@ -9,25 +9,25 @@ export const categoriesService = {
     isActive?: boolean;
     parentCategory?: string;
   }): Promise<CategoriesResponse> => {
-    const response = await apiClient.get(
+    const response = await apiClient.get<CategoriesResponse>(
       apiEndpoints.categories.getAll,
       params
     );
     // Backend returns: { success, message, data: { categories, pagination } }
     // apiClient.get returns response.data, so we need response.data (which is the data object)
-    return response.data;
+    return response;
   },
 
   // Get category by ID
   getCategory: async (id: string): Promise<Category> => {
-    const response = await apiClient.get(apiEndpoints.categories.getById(id));
-    return response.data.category;
+    const response = await apiClient.get<{ category: Category }>(apiEndpoints.categories.getById(id));
+    return response.category;
   },
 
   // Create category
   createCategory: async (data: Partial<Category>): Promise<Category> => {
-    const response = await apiClient.post(apiEndpoints.categories.create, data);
-    return response.data.category;
+    const response = await apiClient.post<{ category: Category }>(apiEndpoints.categories.create, data);
+    return response.category;
   },
 
   // Update category
@@ -35,11 +35,11 @@ export const categoriesService = {
     id: string,
     data: Partial<Category>
   ): Promise<Category> => {
-    const response = await apiClient.put(
+    const response = await apiClient.put<{ category: Category }>(
       apiEndpoints.categories.update(id),
       data
     );
-    return response.data.category;
+    return response.category;
   },
 
   // Delete category

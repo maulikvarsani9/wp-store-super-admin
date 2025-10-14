@@ -4,8 +4,8 @@ import type { LoginRequest, LoginResponse, User } from '../types/api';
 export const authService = {
   // Login
   login: async (data: LoginRequest): Promise<LoginResponse> => {
-    const response = await apiClient.post(apiEndpoints.auth.login, data);
-    return response.data;
+    const response = await apiClient.post<LoginResponse>(apiEndpoints.auth.login, data);
+    return response;
   },
 
   // Logout
@@ -15,8 +15,8 @@ export const authService = {
 
   // Get current user profile
   getProfile: async (): Promise<User> => {
-    const response = await apiClient.get(apiEndpoints.auth.profile);
-    return response.data.user;
+    const response = await apiClient.get<{ user: User }>(apiEndpoints.auth.profile);
+    return response.user;
   },
 };
 

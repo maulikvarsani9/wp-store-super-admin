@@ -1,11 +1,11 @@
 import React, { useState } from 'react';
-import { FiPlus, FiEdit2, FiTrash2, FiEye } from 'react-icons/fi';
+import { FiPlus, FiEdit2, FiTrash2 } from 'react-icons/fi'; // Removed FiEye
 import { Button } from '@/components/ui/button';
 import Loader from '@/components/shared/Loader';
 import Pagination from '@/components/shared/Pagination';
 import DeleteConfirmationDialog from '@/components/shared/DeleteConfirmationDialog';
 import { useBlogs } from '@/hooks/useBlogs';
-import type { Blog } from '@/types/api';
+// import type { Blog } from '@/types/api'; // Removed unused import
 import { useToast } from '@/contexts/ToastContext';
 import { useNavigate } from 'react-router-dom';
 
@@ -44,13 +44,13 @@ const BlogList: React.FC = () => {
 
     const handlePageChange = (page: number) => {
         setCurrentPage(page);
-        fetchBlogs({ page, limit: 10, search: searchQuery });
+        fetchBlogs(page, searchQuery);
     };
 
     const handleSearch = (e: React.FormEvent) => {
         e.preventDefault();
         setCurrentPage(1);
-        fetchBlogs({ page: 1, limit: 10, search: searchQuery });
+        fetchBlogs(1, searchQuery);
     };
 
     const truncateText = (text: string, maxLength: number) => {
@@ -205,7 +205,13 @@ const BlogList: React.FC = () => {
                         <Pagination
                             currentPage={currentPage}
                             totalPages={pagination.totalPages}
+                            totalItems={pagination.total}
+                            itemsPerPage={pagination.limit}
                             onPageChange={handlePageChange}
+                            onItemsPerPageChange={(count) => {
+                                // Handle items per page change if needed
+                                console.log('Items per page changed to:', count);
+                            }}
                         />
                     </div>
                 )}
@@ -214,8 +220,9 @@ const BlogList: React.FC = () => {
             <DeleteConfirmationDialog
                 isOpen={deleteConfirmation.isOpen}
                 onConfirm={handleDeleteConfirm}
-                onCancel={handleDeleteCancel}
-                itemName="blog post"
+                onClose={handleDeleteCancel}
+                title="Delete Blog Post"
+                message="Are you sure you want to delete this blog post? This action cannot be undone."
             />
         </div>
     );

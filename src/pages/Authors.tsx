@@ -3,7 +3,7 @@ import { FiPlus, FiEdit2, FiTrash2, FiX, FiUpload } from 'react-icons/fi';
 import { Button } from '@/components/ui/button';
 import { Formik, Form } from 'formik';
 import FormInput from '@/components/shared/FormInput';
-import FormTextarea from '@/components/shared/FormTextarea';
+// import FormTextarea from '@/components/shared/FormTextarea'; // Removed unused import
 import Loader from '@/components/shared/Loader';
 import Pagination from '@/components/shared/Pagination';
 import DeleteConfirmationDialog from '@/components/shared/DeleteConfirmationDialog';
@@ -25,7 +25,7 @@ const Authors: React.FC = () => {
         authorId: string | null;
     }>({ isOpen: false, authorId: null });
 
-    const [currentPage, setCurrentPage] = useState(1);
+    // const [currentPage, setCurrentPage] = useState(1); // Removed unused variable
     const [imageUrl, setImageUrl] = useState<string>('');
     const [imagePreview, setImagePreview] = useState<string | null>(null);
     const [isUploading, setIsUploading] = useState(false);
@@ -113,7 +113,7 @@ const Authors: React.FC = () => {
     };
 
     const handlePageChange = (page: number) => {
-        setCurrentPage(page);
+        // setCurrentPage(page); // Removed unused variable
         fetchAuthors(page);
     };
 
@@ -186,7 +186,13 @@ const Authors: React.FC = () => {
                 <Pagination
                     currentPage={pagination.page}
                     totalPages={pagination.totalPages}
+                    totalItems={pagination.total}
+                    itemsPerPage={pagination.limit}
                     onPageChange={handlePageChange}
+                    onItemsPerPageChange={(count) => {
+                        // Handle items per page change if needed
+                        console.log('Items per page changed to:', count);
+                    }}
                 />
             </div>
 

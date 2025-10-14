@@ -8,17 +8,17 @@ export const blogsService = {
     limit?: number;
     search?: string;
   }): Promise<BlogsResponse> => {
-    const response = await apiClient.get(
+    const response = await apiClient.get<BlogsResponse>(
       apiEndpoints.blogs.getAll,
       params
     );
-    return response.data;
+    return response;
   },
 
   // Get blog by ID
   getBlog: async (id: string): Promise<{ blog: Blog }> => {
-    const response = await apiClient.get(apiEndpoints.blogs.getById(id));
-    return response.data;
+    const response = await apiClient.get<{ blog: Blog }>(apiEndpoints.blogs.getById(id));
+    return response;
   },
 
   // Create blog
@@ -29,8 +29,8 @@ export const blogsService = {
     coverImage: string;
     author: string;
   }): Promise<Blog> => {
-    const response = await apiClient.post(apiEndpoints.blogs.create, data);
-    return response.data.blog;
+    const response = await apiClient.post<{ blog: Blog }>(apiEndpoints.blogs.create, data);
+    return response.blog;
   },
 
   // Update blog
@@ -44,11 +44,11 @@ export const blogsService = {
       author: string;
     }
   ): Promise<Blog> => {
-    const response = await apiClient.put(
+    const response = await apiClient.put<{ blog: Blog }>(
       apiEndpoints.blogs.update(id),
       data
     );
-    return response.data.blog;
+    return response.blog;
   },
 
   // Delete blog

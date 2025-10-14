@@ -1,6 +1,6 @@
 import { create } from 'zustand';
 import { persist } from 'zustand/middleware';
-import type { User } from '../types/api';
+import type { User, LoginResponse } from '../types/api';
 import { apiClient, apiEndpoints } from '../lib/api';
 import { navigateToLogin } from '../utils/navigation';
 
@@ -42,13 +42,13 @@ export const useStore = create<StoreState>()(
         try {
           console.log('=== LOGIN START ===');
 
-          const response = await apiClient.post(apiEndpoints.auth.login, {
+          const response = await apiClient.post<LoginResponse>(apiEndpoints.auth.login, {
             email,
             password,
           });
           console.log('Login response:', response);
 
-          const { user, token, refreshToken } = response.data;
+          const { user, token, refreshToken } = response;
           console.log('Extracted data:', {
             user,
             token: token ? 'present' : 'missing',
