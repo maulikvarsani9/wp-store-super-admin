@@ -1,8 +1,9 @@
-import { create } from 'zustand';
-import { persist } from 'zustand/middleware';
-import type { User, LoginResponse } from '../types/api';
-import { apiClient, apiEndpoints } from '../lib/api';
-import { navigateToLogin } from '../utils/navigation';
+import { create } from "zustand";
+import { persist } from "zustand/middleware";
+import type { User, LoginResponse } from "../types/api";
+import { apiClient, apiEndpoints } from "../lib/api";
+import { navigateToLogin } from "../utils/navigation";
+import type { AxiosResponse } from "axios";
 
 interface StoreState {
   // Auth
@@ -30,7 +31,7 @@ export const useStore = create<StoreState>()(
     (set, get) => ({
       // Auth
       user: null,
-      setUser: user => set({ user, isAuthenticated: !!user }),
+      setUser: (user) => set({ user, isAuthenticated: !!user }),
       isAuthenticated: false,
       isInitialized: false,
       token: null,
@@ -40,40 +41,41 @@ export const useStore = create<StoreState>()(
 
       login: async (email: string, password: string) => {
         try {
-          console.log('=== LOGIN START ===');
+          console.log("=== LOGIN START ===");
 
-          const response = await apiClient.post<LoginResponse>(apiEndpoints.auth.login, {
-            email,
-            password,
-          });
-          console.log('Login response:', response);
-
-          const { user, token, refreshToken } = response;
-          console.log('Extracted data:', {
+          const { data } = await apiClient.post<AxiosResponse>(
+            apiEndpoints.auth.login,
+            {
+              email,
+              password,
+            }
+          );
+          const { user, token, refreshToken } = data as LoginResponse;
+          console.log("Extracted data:", {
             user,
-            token: token ? 'present' : 'missing',
-            refreshToken: refreshToken ? 'present' : 'missing',
+            token: token ? "present" : "missing",
+            refreshToken: refreshToken ? "present" : "missing",
           });
 
           if (!token) {
-            throw new Error('No token received from server');
+            throw new Error("No token received from server");
           }
 
           if (!user) {
-            throw new Error('No user data received from server');
+            throw new Error("No user data received from server");
           }
 
           // Only allow superadmin role
-          if (user.role !== 'superadmin') {
-            throw new Error('Access denied. Super admin access only.');
+          if (user.role !== "superadmin") {
+            throw new Error("Access denied. Super admin access only.");
           }
 
           set({ user, token, refreshToken, isAuthenticated: true });
-          console.log('=== LOGIN SUCCESS ===');
+          console.log("=== LOGIN SUCCESS ===");
           return true;
         } catch (error) {
-          console.log('=== LOGIN ERROR ===');
-          console.error('Login failed:', error);
+          console.log("=== LOGIN ERROR ===");
+          console.error("Login failed:", error);
           throw error;
         }
       },
@@ -86,9 +88,9 @@ export const useStore = create<StoreState>()(
           if (token) {
             try {
               await apiClient.post(apiEndpoints.auth.logout);
-              console.log('Logout API called successfully');
+              console.log("Logout API called successfully");
             } catch (error) {
-              console.error('Logout API error:', error);
+              console.error("Logout API error:", error);
               // Continue with local logout even if API fails
             }
           }
@@ -100,12 +102,12 @@ export const useStore = create<StoreState>()(
             refreshToken: null,
             isAuthenticated: false,
           });
-          console.log('Store cleared after logout');
+          console.log("Store cleared after logout");
 
           // Navigate to login page
           navigateToLogin();
         } catch (error) {
-          console.error('Logout error:', error);
+          console.error("Logout error:", error);
           // Clear store state even if there's an error
           set({
             user: null,
@@ -120,24 +122,24 @@ export const useStore = create<StoreState>()(
 
       initializeAuth: () => {
         const { isInitialized } = get();
-        console.log('=== INITIALIZE AUTH START ===');
+        console.log("=== INITIALIZE AUTH START ===");
 
         if (isInitialized) {
-          console.log('Already initialized, skipping');
+          console.log("Already initialized, skipping");
           return;
         }
 
         // Get current store state
         const { user, token, refreshToken } = get();
 
-        console.log('Current store state:', {
-          user: user ? 'present' : 'missing',
-          token: token ? 'present' : 'missing',
-          refreshToken: refreshToken ? 'present' : 'missing',
+        console.log("Current store state:", {
+          user: user ? "present" : "missing",
+          token: token ? "present" : "missing",
+          refreshToken: refreshToken ? "present" : "missing",
         });
 
         if (token && user) {
-          console.log('Auth data found in store');
+          console.log("Auth data found in store");
           set({ isAuthenticated: true, isInitialized: true });
         } else {
           set({
@@ -147,20 +149,20 @@ export const useStore = create<StoreState>()(
             isAuthenticated: false,
             isInitialized: true,
           });
-          console.log('No auth data in store, set unauthenticated');
+          console.log("No auth data in store, set unauthenticated");
         }
-        console.log('=== INITIALIZE AUTH END ===');
+        console.log("=== INITIALIZE AUTH END ===");
       },
 
       // UI State
       isLoading: false,
-      setLoading: loading => set({ isLoading: loading }),
+      setLoading: (loading) => set({ isLoading: loading }),
       error: null,
-      setError: error => set({ error }),
+      setError: (error) => set({ error }),
     }),
     {
-      name: 'super-admin-store',
-      partialize: state => ({
+      name: "super-admin-store",
+      partialize: (state) => ({
         user: state.user,
         isAuthenticated: state.isAuthenticated,
         token: state.token,
@@ -169,4 +171,3 @@ export const useStore = create<StoreState>()(
     }
   )
 );
-

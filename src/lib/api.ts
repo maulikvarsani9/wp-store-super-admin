@@ -5,10 +5,13 @@ import { useStore } from '../store/store';
 const API_BASE_URL =
   import.meta.env.VITE_API_URL || 'http://localhost:4000/api';
 
+console.log('API_BASE_URL:', API_BASE_URL);
+
 class ApiClient {
   private axiosInstance: ReturnType<typeof axios.create>;
 
   constructor(baseURL: string) {
+    console.log('Creating ApiClient with baseURL:', baseURL);
     this.axiosInstance = axios.create({
       baseURL,
       timeout: 10000,
@@ -95,10 +98,12 @@ class ApiClient {
     config: Record<string, unknown> = {}
   ): Promise<T> {
     try {
+      console.log('Making API request to:', endpoint, 'with config:', config);
       const response = await this.axiosInstance.request({
         url: endpoint,
         ...config,
       });
+      console.log('API response received:', response);
       return response.data;
     } catch (error) {
       console.error('API request failed:', error);

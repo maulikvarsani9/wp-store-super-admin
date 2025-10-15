@@ -1,3 +1,4 @@
+import type { AxiosResponse } from 'axios';
 import { apiClient, apiEndpoints } from '../lib/api';
 import type { Author, AuthorsResponse } from '../types/api';
 
@@ -8,11 +9,11 @@ export const authorsService = {
     limit?: number;
     search?: string;
   }): Promise<AuthorsResponse> => {
-    const response = await apiClient.get<AuthorsResponse>(
+    const response = await apiClient.get<AxiosResponse>(
       apiEndpoints.authors.getAll,
       params
     );
-    return response;
+    return response.data;
   },
 
   // Get author by ID

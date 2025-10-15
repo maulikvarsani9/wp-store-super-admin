@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { FiEye, FiEyeOff, FiLock, FiMail } from 'react-icons/fi';
 import { useStore } from '../store/store';
 import { useNavigate } from 'react-router-dom';
-import { Formik, Form } from 'formik';
+import { useFormik } from 'formik';
 import FormInput from '../components/shared/FormInput';
 import { useToast } from '../contexts/ToastContext';
 import { loginSchema } from '../schemas/validationSchemas';
@@ -26,8 +26,7 @@ const Login: React.FC = () => {
     };
 
     const handleSubmit = async (
-        values: typeof initialValues,
-        { setSubmitting }: { setSubmitting: (isSubmitting: boolean) => void }
+        values: typeof initialValues
     ) => {
         try {
             await login(values.email, values.password);
@@ -41,10 +40,16 @@ const Login: React.FC = () => {
                     ? err.message
                     : 'Invalid email or password. Please try again.';
             showError('Login Failed', errorMessage);
-        } finally {
-            setSubmitting(false);
         }
     };
+
+    const formik = useFormik({
+        initialValues,
+        validationSchema: loginSchema,
+        onSubmit: handleSubmit,
+        validateOnChange: false,
+        validateOnBlur: false,
+    });
 
     return (
         <div className="min-h-screen bg-gray-50 flex flex-col justify-center py-12 sm:px-6 lg:px-8">
@@ -62,58 +67,54 @@ const Login: React.FC = () => {
 
             <div className="mt-8 w-[90vw] mx-auto sm:w-full sm:max-w-md">
                 <div className="bg-white p-6 sm:p-8 shadow sm:rounded-lg">
-                    <Formik
-                        initialValues={initialValues}
-                        validationSchema={loginSchema}
-                        onSubmit={handleSubmit}
-                        validateOnChange={false}
-                        validateOnBlur={false}
-                    >
-                        {({ isSubmitting }) => (
-                            <Form className="space-y-6">
-                                <FormInput
-                                    label="Email Address"
-                                    type="email"
-                                    name="email"
-                                    required
-                                    autoComplete="email"
-                                    icon={<FiMail className="w-5 h-5 text-gray-400" />}
-                                />
+                    <form onSubmit={formik.handleSubmit} className="space-y-6">
+                        <FormInput
+                            label="Email Address"
+                            type="text"
+                            name="email"
+                            icon={<FiMail className="w-5 h-5 text-gray-400" />}
+                            value={formik.values.email}
+                            onChange={formik.handleChange}
+                            onBlur={formik.handleBlur}
+                            error={formik.errors.email}
+                            touched={formik.touched.email}
+                        />
 
-                                <div className="relative">
-                                    <FormInput
-                                        label="Password"
-                                        type={showPassword ? 'text' : 'password'}
-                                        name="password"
-                                        required
-                                        autoComplete="current-password"
-                                        icon={<FiLock className="w-5 h-5 text-gray-400" />}
-                                    />
-                                    <button
-                                        type="button"
-                                        className="absolute inset-y-0 top-8.5 right-0 pr-3 flex items-center h-fit"
-                                        onClick={() => setShowPassword(!showPassword)}
-                                    >
-                                        {showPassword ? (
-                                            <FiEyeOff className="h-5 w-5 text-gray-400" />
-                                        ) : (
-                                            <FiEye className="h-5 w-5 text-gray-400" />
-                                        )}
-                                    </button>
-                                </div>
+                        <div className="relative">
+                            <FormInput
+                                label="Password"
+                                type={showPassword ? 'text' : 'password'}
+                                name="password"
+                                icon={<FiLock className="w-5 h-5 text-gray-400" />}
+                                value={formik.values.password}
+                                onChange={formik.handleChange}
+                                onBlur={formik.handleBlur}
+                                error={formik.errors.password}
+                                touched={formik.touched.password}
+                            />
+                            <button
+                                type="button"
+                                className="absolute inset-y-0 top-8.5 right-0 pr-3 flex items-center h-fit"
+                                onClick={() => setShowPassword(!showPassword)}
+                            >
+                                {showPassword ? (
+                                    <FiEyeOff className="h-5 w-5 text-gray-400" />
+                                ) : (
+                                    <FiEye className="h-5 w-5 text-gray-400" />
+                                )}
+                            </button>
+                        </div>
 
-                                <div>
-                                    <Button
-                                        type="submit"
-                                        className="w-full bg-[#ff6b00] hover:bg-[#ff6b00]/90"
-                                        disabled={isSubmitting}
-                                    >
-                                        {isSubmitting ? 'Signing in...' : 'Sign in'}
-                                    </Button>
-                                </div>
-                            </Form>
-                        )}
-                    </Formik>
+                        <div>
+                            <Button
+                                type="submit"
+                                className="w-full bg-[#ff6b00] hover:bg-[#ff6b00]/90"
+                                disabled={formik.isSubmitting}
+                            >
+                                {formik.isSubmitting ? 'Signing in...' : 'Sign in'}
+                            </Button>
+                        </div>
+                    </form>
                 </div>
             </div>
         </div>

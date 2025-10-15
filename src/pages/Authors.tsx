@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { FiPlus, FiEdit2, FiTrash2, FiX, FiUpload } from 'react-icons/fi';
 import { Button } from '@/components/ui/button';
-import { Formik, Form } from 'formik';
+import { useFormik } from 'formik';
 import FormInput from '@/components/shared/FormInput';
 // import FormTextarea from '@/components/shared/FormTextarea'; // Removed unused import
 import Loader from '@/components/shared/Loader';
@@ -16,6 +16,90 @@ import * as Yup from 'yup';
 const authorSchema = Yup.object().shape({
     name: Yup.string().min(2, 'Name must be at least 2 characters').max(100).required('Name is required'),
 });
+
+interface AuthorFormProps {
+    editingAuthor: Author | null;
+    handleSubmit: (values: { name: string }) => Promise<void>;
+    handleCloseModal: () => void;
+    imagePreview: string | null;
+    handleImageChange: (e: React.ChangeEvent<HTMLInputElement>) => Promise<void>;
+    isUploading: boolean;
+}
+
+const AuthorForm: React.FC<AuthorFormProps> = ({
+    editingAuthor,
+    handleSubmit,
+    handleCloseModal,
+    imagePreview,
+    handleImageChange,
+    isUploading,
+}) => {
+    const formik = useFormik({
+        initialValues: {
+            name: editingAuthor?.name || '',
+        },
+        validationSchema: authorSchema,
+        onSubmit: handleSubmit,
+    });
+
+    return (
+        <form onSubmit={formik.handleSubmit} className="space-y-4">
+            <FormInput
+                name="name"
+                label="Name"
+                placeholder="John Doe"
+                required
+                value={formik.values.name}
+                onChange={formik.handleChange}
+                onBlur={formik.handleBlur}
+                error={formik.errors.name}
+                touched={formik.touched.name}
+            />
+
+            {/* Image Upload */}
+            <div>
+                <label className="mb-2 block text-sm font-medium">Profile Image</label>
+                <div className="space-y-3">
+                    {imagePreview && (
+                        <div className="relative inline-block">
+                            <img
+                                src={imagePreview}
+                                alt="Preview"
+                                className="h-32 w-32 rounded-full object-cover"
+                            />
+                        </div>
+                    )}
+                    <div>
+                        <label
+                            htmlFor="image-upload"
+                            className="inline-flex cursor-pointer items-center gap-2 rounded-lg border border-gray-300 bg-white px-4 py-2 text-sm font-medium hover:bg-gray-50 dark:border-gray-600 dark:bg-gray-700 dark:hover:bg-gray-600"
+                        >
+                            <FiUpload />
+                            {isUploading ? 'Uploading...' : 'Upload Image'}
+                        </label>
+                        <input
+                            id="image-upload"
+                            type="file"
+                            accept="image/*"
+                            className="hidden"
+                            onChange={handleImageChange}
+                            disabled={isUploading}
+                        />
+                    </div>
+                </div>
+            </div>
+
+            <div className="flex justify-end gap-3 pt-4">
+                <Button type="button" onClick={handleCloseModal} variant="outline">
+                    Cancel
+                </Button>
+                <Button type="submit" disabled={formik.isSubmitting || isUploading}>
+                    {formik.isSubmitting ? 'Saving...' : editingAuthor ? 'Update' : 'Create'}
+                </Button>
+            </div>
+        </form>
+    );
+};
 
 const Authors: React.FC = () => {
     const [isModalOpen, setIsModalOpen] = useState(false);
@@ -209,61 +293,14 @@ const Authors: React.FC = () => {
                             </Button>
                         </div>
 
-                        <Formik
-                            initialValues={{
-                                name: editingAuthor?.name || '',
-                            }}
-                            validationSchema={authorSchema}
-                            onSubmit={handleSubmit}
-                        >
-                            {({ isSubmitting }) => (
-                                <Form className="space-y-4">
-                                    <FormInput name="name" label="Name" placeholder="John Doe" required />
-
-                                    {/* Image Upload */}
-                                    <div>
-                                        <label className="mb-2 block text-sm font-medium">Profile Image</label>
-                                        <div className="space-y-3">
-                                            {imagePreview && (
-                                                <div className="relative inline-block">
-                                                    <img
-                                                        src={imagePreview}
-                                                        alt="Preview"
-                                                        className="h-32 w-32 rounded-full object-cover"
-                                                    />
-                                                </div>
-                                            )}
-                                            <div>
-                                                <label
-                                                    htmlFor="image-upload"
-                                                    className="inline-flex cursor-pointer items-center gap-2 rounded-lg border border-gray-300 bg-white px-4 py-2 text-sm font-medium hover:bg-gray-50 dark:border-gray-600 dark:bg-gray-700 dark:hover:bg-gray-600"
-                                                >
-                                                    <FiUpload />
-                                                    {isUploading ? 'Uploading...' : 'Upload Image'}
-                                                </label>
-                                                <input
-                                                    id="image-upload"
-                                                    type="file"
-                                                    accept="image/*"
-                                                    className="hidden"
-                                                    onChange={handleImageChange}
-                                                    disabled={isUploading}
-                                                />
-                                            </div>
-                                        </div>
-                                    </div>
-
-                                    <div className="flex justify-end gap-3 pt-4">
-                                        <Button type="button" onClick={handleCloseModal} variant="outline">
-                                            Cancel
-                                        </Button>
-                                        <Button type="submit" disabled={isSubmitting || isUploading}>
-                                            {isSubmitting ? 'Saving...' : editingAuthor ? 'Update' : 'Create'}
-                                        </Button>
-                                    </div>
-                                </Form>
-                            )}
-                        </Formik>
+                        <AuthorForm
+                            editingAuthor={editingAuthor}
+                            handleSubmit={handleSubmit}
+                            handleCloseModal={handleCloseModal}
+                            imagePreview={imagePreview}
+                            handleImageChange={handleImageChange}
+                            isUploading={isUploading}
+                        />
                     </div>
                 </div>
             )}

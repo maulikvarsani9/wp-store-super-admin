@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { FiUpload, FiArrowLeft } from 'react-icons/fi';
 import { Button } from '@/components/ui/button';
-import { Formik, Form, Field, ErrorMessage } from 'formik';
+import { useFormik } from 'formik';
 import FormInput from '@/components/shared/FormInput';
 import Loader from '@/components/shared/Loader';
 import { useNavigate, useParams } from 'react-router-dom';
@@ -134,6 +134,13 @@ const BlogForm: React.FC = () => {
         }
     };
 
+    const formik = useFormik({
+        initialValues,
+        validationSchema: blogSchema,
+        onSubmit: handleSubmit,
+        enableReinitialize: true,
+    });
+
     if (loading) {
         return <Loader />;
     }
@@ -157,165 +164,161 @@ const BlogForm: React.FC = () => {
 
             {/* Form */}
             <div className="rounded-lg border bg-white p-6 shadow-sm dark:bg-gray-800">
-                <Formik
-                    initialValues={initialValues}
-                    validationSchema={blogSchema}
-                    onSubmit={handleSubmit}
-                    enableReinitialize
-                >
-                    {({ isSubmitting }) => (
-                        <Form className="space-y-6">
-                            {/* Title */}
-                            <FormInput name="title" label="Title" placeholder="Enter blog title" required />
+                <form onSubmit={formik.handleSubmit} className="space-y-6">
+                    {/* Title */}
+                    <FormInput
+                        name="title"
+                        label="Title"
+                        placeholder="Enter blog title"
+                        required
+                        value={formik.values.title}
+                        onChange={formik.handleChange}
+                        onBlur={formik.handleBlur}
+                        error={formik.errors.title}
+                        touched={formik.touched.title}
+                    />
 
-                            {/* Author Dropdown */}
-                            <div>
-                                <label className="mb-2 block text-sm font-medium">
-                                    Author <span className="text-red-500">*</span>
-                                </label>
-                                <Field
-                                    as="select"
-                                    name="author"
-                                    className="w-full rounded-lg border border-gray-300 px-4 py-2 dark:border-gray-600 dark:bg-gray-700"
-                                >
-                                    <option value="">Select an author</option>
-                                    {authors.map((author) => (
-                                        <option key={author._id} value={author._id}>
-                                            {author.name}
-                                        </option>
-                                    ))}
-                                </Field>
-                                <ErrorMessage name="author">
-                                    {(msg) => <p className="mt-1 text-sm text-red-600">{msg}</p>}
-                                </ErrorMessage>
-                            </div>
+                    {/* Author Dropdown */}
+                    <div>
+                        <label className="mb-2 block text-sm font-medium">
+                            Author <span className="text-red-500">*</span>
+                        </label>
+                        <select
+                            name="author"
+                            value={formik.values.author}
+                            onChange={formik.handleChange}
+                            className="w-full rounded-lg border border-gray-300 px-4 py-2 dark:border-gray-600 dark:bg-gray-700"
+                        >
+                            <option value="">Select an author</option>
+                            {authors.map((author) => (
+                                <option key={author._id} value={author._id}>
+                                    {author.name}
+                                </option>
+                            ))}
+                        </select>
+                        {formik.errors.author && formik.touched.author && (
+                            <p className="mt-1 text-sm text-red-600">{formik.errors.author}</p>
+                        )}
+                    </div>
 
-                            {/* Image Uploads */}
-                            <div className="grid grid-cols-1 gap-6 md:grid-cols-2">
-                                {/* Main Image */}
+                    {/* Image Uploads */}
+                    <div className="grid grid-cols-1 gap-6 md:grid-cols-2">
+                        {/* Main Image */}
+                        <div>
+                            <label className="mb-2 block text-sm font-medium">
+                                Main Image <span className="text-red-500">*</span>
+                            </label>
+                            <div className="space-y-3">
+                                {mainImagePreview && (
+                                    <img
+                                        src={mainImagePreview}
+                                        alt="Main preview"
+                                        className="h-40 w-full rounded-lg object-cover"
+                                    />
+                                )}
                                 <div>
-                                    <label className="mb-2 block text-sm font-medium">
-                                        Main Image <span className="text-red-500">*</span>
+                                    <input
+                                        type="file"
+                                        accept="image/*"
+                                        onChange={(e) => {
+                                            const file = e.target.files?.[0];
+                                            if (file) {
+                                                handleImageUpload(file, setMainImageUrl, setMainImagePreview);
+                                            }
+                                        }}
+                                        className="hidden"
+                                        id="mainImage"
+                                    />
+                                    <label htmlFor="mainImage">
+                                        <Button
+                                            type="button"
+                                            variant="outline"
+                                            size="sm"
+                                            className="w-full"
+                                            onClick={() => document.getElementById('mainImage')?.click()}
+                                            disabled={isUploading}
+                                        >
+                                            <FiUpload className="mr-2" />
+                                            {isUploading ? 'Uploading...' : 'Upload Main Image'}
+                                        </Button>
                                     </label>
-                                    <div className="space-y-3">
-                                        {mainImagePreview && (
-                                            <img
-                                                src={mainImagePreview}
-                                                alt="Main preview"
-                                                className="h-40 w-full rounded-lg object-cover"
-                                            />
-                                        )}
-                                        <div>
-                                            <input
-                                                type="file"
-                                                accept="image/*"
-                                                onChange={(e) => {
-                                                    const file = e.target.files?.[0];
-                                                    if (file) {
-                                                        handleImageUpload(file, setMainImageUrl, setMainImagePreview);
-                                                    }
-                                                }}
-                                                className="hidden"
-                                                id="mainImage"
-                                            />
-                                            <label htmlFor="mainImage">
-                                                <Button
-                                                    type="button"
-                                                    variant="outline"
-                                                    size="sm"
-                                                    className="w-full"
-                                                    onClick={() => document.getElementById('mainImage')?.click()}
-                                                    disabled={isUploading}
-                                                >
-                                                    <FiUpload className="mr-2" />
-                                                    {isUploading ? 'Uploading...' : 'Upload Main Image'}
-                                                </Button>
-                                            </label>
-                                        </div>
-                                    </div>
-                                </div>
-
-                                {/* Cover Image */}
-                                <div>
-                                    <label className="mb-2 block text-sm font-medium">
-                                        Cover Image <span className="text-red-500">*</span>
-                                    </label>
-                                    <div className="space-y-3">
-                                        {coverImagePreview && (
-                                            <img
-                                                src={coverImagePreview}
-                                                alt="Cover preview"
-                                                className="h-40 w-full rounded-lg object-cover"
-                                            />
-                                        )}
-                                        <div>
-                                            <input
-                                                type="file"
-                                                accept="image/*"
-                                                onChange={(e) => {
-                                                    const file = e.target.files?.[0];
-                                                    if (file) {
-                                                        handleImageUpload(file, setCoverImageUrl, setCoverImagePreview);
-                                                    }
-                                                }}
-                                                className="hidden"
-                                                id="coverImage"
-                                            />
-                                            <label htmlFor="coverImage">
-                                                <Button
-                                                    type="button"
-                                                    variant="outline"
-                                                    size="sm"
-                                                    className="w-full"
-                                                    onClick={() => document.getElementById('coverImage')?.click()}
-                                                    disabled={isUploading}
-                                                >
-                                                    <FiUpload className="mr-2" />
-                                                    {isUploading ? 'Uploading...' : 'Upload Cover Image'}
-                                                </Button>
-                                            </label>
-                                        </div>
-                                    </div>
                                 </div>
                             </div>
+                        </div>
 
-                            {/* Content - Rich Text Editor */}
-                            <div>
-                                <label className="mb-2 block text-sm font-medium">
-                                    Content <span className="text-red-500">*</span>
-                                </label>
-                                <Field name="content">
-                                    {({ field, form }: any) => (
-                                        <>
-                                            <RichTextEditor
-                                                value={field.value}
-                                                onChange={(value) => {
-                                                    form.setFieldValue('content', value);
-                                                    form.setFieldTouched('content', true);
-                                                }}
-                                                placeholder="Write your blog content here..."
-                                                className="border border-gray-300 rounded-lg dark:border-gray-600"
-                                            />
-                                            <ErrorMessage name="content">
-                                                {(msg) => <p className="mt-1 text-sm text-red-600">{msg}</p>}
-                                            </ErrorMessage>
-                                        </>
-                                    )}
-                                </Field>
+                        {/* Cover Image */}
+                        <div>
+                            <label className="mb-2 block text-sm font-medium">
+                                Cover Image <span className="text-red-500">*</span>
+                            </label>
+                            <div className="space-y-3">
+                                {coverImagePreview && (
+                                    <img
+                                        src={coverImagePreview}
+                                        alt="Cover preview"
+                                        className="h-40 w-full rounded-lg object-cover"
+                                    />
+                                )}
+                                <div>
+                                    <input
+                                        type="file"
+                                        accept="image/*"
+                                        onChange={(e) => {
+                                            const file = e.target.files?.[0];
+                                            if (file) {
+                                                handleImageUpload(file, setCoverImageUrl, setCoverImagePreview);
+                                            }
+                                        }}
+                                        className="hidden"
+                                        id="coverImage"
+                                    />
+                                    <label htmlFor="coverImage">
+                                        <Button
+                                            type="button"
+                                            variant="outline"
+                                            size="sm"
+                                            className="w-full"
+                                            onClick={() => document.getElementById('coverImage')?.click()}
+                                            disabled={isUploading}
+                                        >
+                                            <FiUpload className="mr-2" />
+                                            {isUploading ? 'Uploading...' : 'Upload Cover Image'}
+                                        </Button>
+                                    </label>
+                                </div>
                             </div>
+                        </div>
+                    </div>
 
-                            {/* Action Buttons */}
-                            <div className="flex justify-end gap-3 border-t pt-6">
-                                <Button type="button" onClick={() => navigate('/blogs')} variant="outline">
-                                    Cancel
-                                </Button>
-                                <Button type="submit" disabled={isSubmitting || isUploading}>
-                                    {isSubmitting ? 'Saving...' : isEditMode ? 'Update Blog' : 'Create Blog'}
-                                </Button>
-                            </div>
-                        </Form>
-                    )}
-                </Formik>
+                    {/* Content - Rich Text Editor */}
+                    <div>
+                        <label className="mb-2 block text-sm font-medium">
+                            Content <span className="text-red-500">*</span>
+                        </label>
+                        <RichTextEditor
+                            value={formik.values.content}
+                            onChange={(value) => {
+                                formik.setFieldValue('content', value);
+                                formik.setFieldTouched('content', true);
+                            }}
+                            placeholder="Write your blog content here..."
+                            className="border border-gray-300 rounded-lg dark:border-gray-600"
+                        />
+                        {formik.errors.content && formik.touched.content && (
+                            <p className="mt-1 text-sm text-red-600">{formik.errors.content}</p>
+                        )}
+                    </div>
+
+                    {/* Action Buttons */}
+                    <div className="flex justify-end gap-3 border-t pt-6">
+                        <Button type="button" onClick={() => navigate('/blogs')} variant="outline">
+                            Cancel
+                        </Button>
+                        <Button type="submit" disabled={formik.isSubmitting || isUploading}>
+                            {formik.isSubmitting ? 'Saving...' : isEditMode ? 'Update Blog' : 'Create Blog'}
+                        </Button>
+                    </div>
+                </form>
             </div>
         </div>
     );

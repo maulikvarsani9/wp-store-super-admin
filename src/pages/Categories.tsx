@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { FiPlus, FiEdit2, FiTrash2, FiX, FiImage, FiUpload } from 'react-icons/fi';
 import { Button } from '@/components/ui/button';
-import { Formik, Form } from 'formik';
+import { useFormik } from 'formik';
 import FormInput from '@/components/shared/FormInput';
 import FormTextarea from '@/components/shared/FormTextarea';
 import Loader from '@/components/shared/Loader';
@@ -17,6 +17,230 @@ import { categorySchema } from '@/schemas/validationSchemas';
 import type { Category } from '@/types/api';
 import { uploadService } from '@/services/uploadService';
 import { useToast } from '@/contexts/ToastContext';
+
+interface CategoryFormProps {
+    editingCategory: Category | null;
+    handleSubmit: (values: { name: string; description: string; isActive: boolean }) => Promise<void>;
+    handleCloseModal: () => void;
+    mainImagePreview: string | null;
+    mainImageUrl: string | null;
+    handleMainImageChange: (e: React.ChangeEvent<HTMLInputElement>) => Promise<void>;
+    removeMainImage: () => void;
+    additionalImagesPreview: string[];
+    additionalImageUrls: string[];
+    handleAdditionalImagesChange: (e: React.ChangeEvent<HTMLInputElement>) => Promise<void>;
+    removeAdditionalImage: (index: number) => void;
+    isUploading: boolean;
+}
+
+const CategoryForm: React.FC<CategoryFormProps> = ({
+    editingCategory,
+    handleSubmit,
+    handleCloseModal,
+    mainImagePreview,
+    mainImageUrl,
+    handleMainImageChange,
+    removeMainImage,
+    additionalImagesPreview,
+    additionalImageUrls,
+    handleAdditionalImagesChange,
+    removeAdditionalImage,
+    isUploading,
+}) => {
+    const initialValues = {
+        name: editingCategory?.name || '',
+        description: editingCategory?.description || '',
+        isActive: editingCategory?.isActive ?? true,
+    };
+
+    const formik = useFormik({
+        initialValues,
+        validationSchema: categorySchema,
+        onSubmit: handleSubmit,
+        enableReinitialize: true,
+    });
+
+    return (
+        <form onSubmit={formik.handleSubmit} className="space-y-4">
+            <FormInput
+                label="Category Name"
+                name="name"
+                required
+                placeholder="Enter category name"
+                value={formik.values.name}
+                onChange={formik.handleChange}
+                onBlur={formik.handleBlur}
+                error={formik.errors.name}
+                touched={formik.touched.name}
+            />
+
+            <FormTextarea
+                label="Description"
+                name="description"
+                placeholder="Enter category description"
+                rows={4}
+                value={formik.values.description}
+                onChange={formik.handleChange}
+                onBlur={formik.handleBlur}
+                error={formik.errors.description}
+                touched={formik.touched.description}
+            />
+
+            {/* Category Images Section */}
+            <div className="border-t pt-4">
+                <h3 className="text-lg font-semibold mb-4">Category Images</h3>
+
+                {/* Main Image */}
+                <div className="mb-6">
+                    <label className="block text-sm font-medium text-gray-700 mb-2">
+                        Main Image <span className="text-red-500">*</span>
+                    </label>
+
+                    <div className="space-y-2">
+                        <input
+                            type="file"
+                            accept="image/*"
+                            onChange={handleMainImageChange}
+                            className="hidden"
+                            id="mainImage"
+                        />
+                        <label
+                            htmlFor="mainImage"
+                            className="inline-flex items-center gap-2 px-4 py-2 bg-gray-100 hover:bg-gray-200 rounded-lg cursor-pointer transition-colors"
+                        >
+                            <FiUpload className="w-4 h-4" />
+                            <span>Upload Main Image</span>
+                        </label>
+                        {mainImagePreview && (
+                            <div className="relative inline-block">
+                                <img
+                                    src={mainImagePreview}
+                                    alt="Main preview"
+                                    className="h-32 w-32 object-cover rounded-lg border-2 border-gray-200"
+                                />
+                                {mainImageUrl ? (
+                                    <span className="absolute top-1 left-1 bg-green-500 text-white text-xs px-2 py-1 rounded">
+                                        ✓ Uploaded
+                                    </span>
+                                ) : (
+                                    <span className="absolute top-1 left-1 bg-yellow-500 text-white text-xs px-2 py-1 rounded animate-pulse">
+                                        Uploading...
+                                    </span>
+                                )}
+                                <button
+                                    type="button"
+                                    onClick={removeMainImage}
+                                    className="absolute -top-2 -right-2 bg-red-500 hover:bg-red-600 text-white p-1 rounded-full transition-colors"
+                                >
+                                    <FiX className="w-4 h-4" />
+                                </button>
+                            </div>
+                        )}
+                    </div>
+                </div>
+
+                {/* Additional Images */}
+                <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-2">
+                        Additional Images (Max 5)
+                    </label>
+
+                    <div className="space-y-2">
+                        <input
+                            type="file"
+                            accept="image/*"
+                            multiple
+                            onChange={handleAdditionalImagesChange}
+                            className="hidden"
+                            id="additionalImages"
+                        />
+                        <label
+                            htmlFor="additionalImages"
+                            className="inline-flex items-center gap-2 px-4 py-2 bg-gray-100 hover:bg-gray-200 rounded-lg cursor-pointer transition-colors"
+                        >
+                            <FiPlus className="w-4 h-4" />
+                            <span>Add Images</span>
+                        </label>
+
+                        {additionalImagesPreview.length > 0 && (
+                            <div className="grid grid-cols-3 gap-2 mt-2">
+                                {additionalImagesPreview.map((image, index) => {
+                                    const hasUrl = additionalImageUrls[index];
+
+                                    return (
+                                        <div key={index} className="relative">
+                                            <img
+                                                src={image}
+                                                alt={`Additional ${index + 1}`}
+                                                className="h-24 w-full object-cover rounded-lg border-2 border-gray-200"
+                                            />
+                                            {hasUrl ? (
+                                                <span className="absolute top-1 left-1 bg-green-500 text-white text-xs px-2 py-1 rounded">
+                                                    ✓ Uploaded
+                                                </span>
+                                            ) : (
+                                                <span className="absolute top-1 left-1 bg-yellow-500 text-white text-xs px-2 py-1 rounded animate-pulse">
+                                                    Uploading...
+                                                </span>
+                                            )}
+                                            <button
+                                                type="button"
+                                                onClick={() => removeAdditionalImage(index)}
+                                                className="absolute -top-2 -right-2 bg-red-500 hover:bg-red-600 text-white p-1 rounded-full transition-colors"
+                                            >
+                                                <FiX className="w-3 h-3" />
+                                            </button>
+                                        </div>
+                                    );
+                                })}
+                            </div>
+                        )}
+                    </div>
+                </div>
+            </div>
+
+            <div className="flex items-center">
+                <input
+                    type="checkbox"
+                    id="isActive"
+                    checked={formik.values.isActive}
+                    onChange={e => formik.setFieldValue('isActive', e.target.checked)}
+                    className="h-4 w-4 text-primary focus:ring-primary border-gray-300 rounded"
+                />
+                <label
+                    htmlFor="isActive"
+                    className="ml-2 block text-sm text-gray-900"
+                >
+                    Active
+                </label>
+            </div>
+
+            <div className="flex gap-3 justify-end pt-4">
+                <Button
+                    type="button"
+                    variant="outline"
+                    onClick={handleCloseModal}
+                    disabled={formik.isSubmitting || isUploading}
+                >
+                    Cancel
+                </Button>
+                <Button
+                    type="submit"
+                    className="bg-[#ff6b00] hover:bg-[#ff6b00]/90"
+                    disabled={formik.isSubmitting || isUploading}
+                >
+                    {isUploading
+                        ? 'Uploading...'
+                        : formik.isSubmitting
+                            ? 'Saving...'
+                            : editingCategory
+                                ? 'Update'
+                                : 'Create'}
+                </Button>
+            </div>
+        </form>
+    );
+};
 
 const Categories: React.FC = () => {
     const [isModalOpen, setIsModalOpen] = useState(false);
@@ -143,11 +367,7 @@ const Categories: React.FC = () => {
     };
 
     const handleSubmit = async (
-        values: { name: string; description: string; isActive: boolean },
-        { setSubmitting, resetForm }: {
-            setSubmitting: (isSubmitting: boolean) => void;
-            resetForm: () => void;
-        }
+        values: { name: string; description: string; isActive: boolean }
     ) => {
         try {
             // Use the already uploaded image URLs
@@ -166,12 +386,9 @@ const Categories: React.FC = () => {
                 await createCategory.mutateAsync(categoryData);
             }
 
-            resetForm();
             handleCloseModal();
         } catch (error) {
             console.error('Error saving category:', error);
-        } finally {
-            setSubmitting(false);
         }
     };
 
@@ -186,11 +403,11 @@ const Categories: React.FC = () => {
         }
     };
 
-    const initialValues = {
-        name: editingCategory?.name || '',
-        description: editingCategory?.description || '',
-        isActive: editingCategory?.isActive ?? true,
-    };
+    // const initialValues = {
+    //     name: editingCategory?.name || '',
+    //     description: editingCategory?.description || '',
+    //     isActive: editingCategory?.isActive ?? true,
+    // };
 
     if (isLoading) {
         return (
@@ -346,185 +563,20 @@ const Categories: React.FC = () => {
                             </button>
                         </div>
 
-                        <Formik
-                            initialValues={initialValues}
-                            validationSchema={categorySchema}
-                            onSubmit={handleSubmit}
-                            enableReinitialize
-                        >
-                            {({ isSubmitting, values, setFieldValue }) => (
-                                <Form className="space-y-4">
-                                    <FormInput
-                                        label="Category Name"
-                                        name="name"
-                                        required
-                                        placeholder="Enter category name"
-                                    />
-
-                                    <FormTextarea
-                                        label="Description"
-                                        name="description"
-                                        placeholder="Enter category description"
-                                        rows={4}
-                                    />
-
-                                    {/* Category Images Section */}
-                                    <div className="border-t pt-4">
-                                        <h3 className="text-lg font-semibold mb-4">Category Images</h3>
-
-                                        {/* Main Image */}
-                                        <div className="mb-6">
-                                            <label className="block text-sm font-medium text-gray-700 mb-2">
-                                                Main Image <span className="text-red-500">*</span>
-                                            </label>
-
-                                            <div className="space-y-2">
-                                                <input
-                                                    type="file"
-                                                    accept="image/*"
-                                                    onChange={handleMainImageChange}
-                                                    className="hidden"
-                                                    id="mainImage"
-                                                />
-                                                <label
-                                                    htmlFor="mainImage"
-                                                    className="inline-flex items-center gap-2 px-4 py-2 bg-gray-100 hover:bg-gray-200 rounded-lg cursor-pointer transition-colors"
-                                                >
-                                                    <FiUpload className="w-4 h-4" />
-                                                    <span>Upload Main Image</span>
-                                                </label>
-                                                {mainImagePreview && (
-                                                    <div className="relative inline-block">
-                                                        <img
-                                                            src={mainImagePreview}
-                                                            alt="Main preview"
-                                                            className="h-32 w-32 object-cover rounded-lg border-2 border-gray-200"
-                                                        />
-                                                        {mainImageUrl ? (
-                                                            <span className="absolute top-1 left-1 bg-green-500 text-white text-xs px-2 py-1 rounded">
-                                                                ✓ Uploaded
-                                                            </span>
-                                                        ) : (
-                                                            <span className="absolute top-1 left-1 bg-yellow-500 text-white text-xs px-2 py-1 rounded animate-pulse">
-                                                                Uploading...
-                                                            </span>
-                                                        )}
-                                                        <button
-                                                            type="button"
-                                                            onClick={removeMainImage}
-                                                            className="absolute -top-2 -right-2 bg-red-500 hover:bg-red-600 text-white p-1 rounded-full transition-colors"
-                                                        >
-                                                            <FiX className="w-4 h-4" />
-                                                        </button>
-                                                    </div>
-                                                )}
-                                            </div>
-                                        </div>
-
-                                        {/* Additional Images */}
-                                        <div>
-                                            <label className="block text-sm font-medium text-gray-700 mb-2">
-                                                Additional Images (Max 5)
-                                            </label>
-
-                                            <div className="space-y-2">
-                                                <input
-                                                    type="file"
-                                                    accept="image/*"
-                                                    multiple
-                                                    onChange={handleAdditionalImagesChange}
-                                                    className="hidden"
-                                                    id="additionalImages"
-                                                />
-                                                <label
-                                                    htmlFor="additionalImages"
-                                                    className="inline-flex items-center gap-2 px-4 py-2 bg-gray-100 hover:bg-gray-200 rounded-lg cursor-pointer transition-colors"
-                                                >
-                                                    <FiPlus className="w-4 h-4" />
-                                                    <span>Add Images</span>
-                                                </label>
-
-                                                {additionalImagesPreview.length > 0 && (
-                                                    <div className="grid grid-cols-3 gap-2 mt-2">
-                                                        {additionalImagesPreview.map((image, index) => {
-                                                            const hasUrl = additionalImageUrls[index];
-
-                                                            return (
-                                                                <div key={index} className="relative">
-                                                                    <img
-                                                                        src={image}
-                                                                        alt={`Additional ${index + 1}`}
-                                                                        className="h-24 w-full object-cover rounded-lg border-2 border-gray-200"
-                                                                    />
-                                                                    {hasUrl ? (
-                                                                        <span className="absolute top-1 left-1 bg-green-500 text-white text-xs px-2 py-1 rounded">
-                                                                            ✓ Uploaded
-                                                                        </span>
-                                                                    ) : (
-                                                                        <span className="absolute top-1 left-1 bg-yellow-500 text-white text-xs px-2 py-1 rounded animate-pulse">
-                                                                            Uploading...
-                                                                        </span>
-                                                                    )}
-                                                                    <button
-                                                                        type="button"
-                                                                        onClick={() => removeAdditionalImage(index)}
-                                                                        className="absolute -top-2 -right-2 bg-red-500 hover:bg-red-600 text-white p-1 rounded-full transition-colors"
-                                                                    >
-                                                                        <FiX className="w-3 h-3" />
-                                                                    </button>
-                                                                </div>
-                                                            );
-                                                        })}
-                                                    </div>
-                                                )}
-                                            </div>
-                                        </div>
-                                    </div>
-
-                                    <div className="flex items-center">
-                                        <input
-                                            type="checkbox"
-                                            id="isActive"
-                                            checked={values.isActive}
-                                            onChange={e =>
-                                                setFieldValue('isActive', e.target.checked)
-                                            }
-                                            className="h-4 w-4 text-primary focus:ring-primary border-gray-300 rounded"
-                                        />
-                                        <label
-                                            htmlFor="isActive"
-                                            className="ml-2 block text-sm text-gray-900"
-                                        >
-                                            Active
-                                        </label>
-                                    </div>
-
-                                    <div className="flex gap-3 justify-end pt-4">
-                                        <Button
-                                            type="button"
-                                            variant="outline"
-                                            onClick={handleCloseModal}
-                                            disabled={isSubmitting || isUploading}
-                                        >
-                                            Cancel
-                                        </Button>
-                                        <Button
-                                            type="submit"
-                                            className="bg-[#ff6b00] hover:bg-[#ff6b00]/90"
-                                            disabled={isSubmitting || isUploading}
-                                        >
-                                            {isUploading
-                                                ? 'Uploading...'
-                                                : isSubmitting
-                                                    ? 'Saving...'
-                                                    : editingCategory
-                                                        ? 'Update'
-                                                        : 'Create'}
-                                        </Button>
-                                    </div>
-                                </Form>
-                            )}
-                        </Formik>
+                        <CategoryForm
+                            editingCategory={editingCategory}
+                            handleSubmit={handleSubmit}
+                            handleCloseModal={handleCloseModal}
+                            mainImagePreview={mainImagePreview}
+                            mainImageUrl={mainImageUrl}
+                            handleMainImageChange={handleMainImageChange}
+                            removeMainImage={removeMainImage}
+                            additionalImagesPreview={additionalImagesPreview}
+                            additionalImageUrls={additionalImageUrls}
+                            handleAdditionalImagesChange={handleAdditionalImagesChange}
+                            removeAdditionalImage={removeAdditionalImage}
+                            isUploading={isUploading}
+                        />
                     </div>
                 </div>
             )}

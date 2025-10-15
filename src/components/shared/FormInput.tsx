@@ -1,5 +1,4 @@
 import React from 'react';
-import { useField } from 'formik';
 
 interface FormInputProps {
     label: string;
@@ -10,6 +9,11 @@ interface FormInputProps {
     autoComplete?: string;
     icon?: React.ReactNode;
     disabled?: boolean;
+    value?: string;
+    onChange?: (e: React.ChangeEvent<HTMLInputElement>) => void;
+    onBlur?: (e: React.FocusEvent<HTMLInputElement>) => void;
+    error?: string;
+    touched?: boolean;
 }
 
 const FormInput: React.FC<FormInputProps> = ({
@@ -21,9 +25,13 @@ const FormInput: React.FC<FormInputProps> = ({
     autoComplete,
     icon,
     disabled = false,
+    value,
+    onChange,
+    onBlur,
+    error,
+    touched,
 }) => {
-    const [field, meta] = useField(name);
-    const hasError = meta.touched && meta.error;
+    const hasError = touched && error;
 
     return (
         <div>
@@ -41,9 +49,12 @@ const FormInput: React.FC<FormInputProps> = ({
                     </div>
                 )}
                 <input
-                    {...field}
                     id={name}
+                    name={name}
                     type={type}
+                    value={value || ''}
+                    onChange={onChange}
+                    onBlur={onBlur}
                     placeholder={placeholder}
                     autoComplete={autoComplete}
                     disabled={disabled}
@@ -58,7 +69,7 @@ const FormInput: React.FC<FormInputProps> = ({
                 />
             </div>
             {hasError && (
-                <p className="mt-1 text-sm text-red-600">{meta.error}</p>
+                <p className="mt-1 text-sm text-red-600">{error}</p>
             )}
         </div>
     );

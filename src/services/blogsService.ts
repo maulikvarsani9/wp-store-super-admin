@@ -1,5 +1,6 @@
-import { apiClient, apiEndpoints } from '../lib/api';
-import type { Blog, BlogsResponse } from '../types/api';
+import type { AxiosResponse } from "axios";
+import { apiClient, apiEndpoints } from "../lib/api";
+import type { Blog, BlogsResponse } from "../types/api";
 
 export const blogsService = {
   // Get all blogs
@@ -8,17 +9,19 @@ export const blogsService = {
     limit?: number;
     search?: string;
   }): Promise<BlogsResponse> => {
-    const response = await apiClient.get<BlogsResponse>(
+    const response = await apiClient.get<AxiosResponse>(
       apiEndpoints.blogs.getAll,
       params
     );
-    return response;
+    return response.data;
   },
 
   // Get blog by ID
-  getBlog: async (id: string): Promise<{ blog: Blog }> => {
-    const response = await apiClient.get<{ blog: Blog }>(apiEndpoints.blogs.getById(id));
-    return response;
+  getBlog: async (id: string): Promise<Blog> => {
+    const response = await apiClient.get<AxiosResponse>(
+      apiEndpoints.blogs.getById(id)
+    );
+    return response.data as Blog;
   },
 
   // Create blog
@@ -29,7 +32,10 @@ export const blogsService = {
     coverImage: string;
     author: string;
   }): Promise<Blog> => {
-    const response = await apiClient.post<{ blog: Blog }>(apiEndpoints.blogs.create, data);
+    const response = await apiClient.post<{ blog: Blog }>(
+      apiEndpoints.blogs.create,
+      data
+    );
     return response.blog;
   },
 
@@ -56,4 +62,3 @@ export const blogsService = {
     await apiClient.delete(apiEndpoints.blogs.delete(id));
   },
 };
-

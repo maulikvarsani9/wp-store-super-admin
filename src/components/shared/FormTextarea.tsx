@@ -1,5 +1,4 @@
 import React from 'react';
-import { useField } from 'formik';
 
 interface FormTextareaProps {
     label: string;
@@ -8,6 +7,11 @@ interface FormTextareaProps {
     required?: boolean;
     rows?: number;
     disabled?: boolean;
+    value?: string;
+    onChange?: (e: React.ChangeEvent<HTMLTextAreaElement>) => void;
+    onBlur?: (e: React.FocusEvent<HTMLTextAreaElement>) => void;
+    error?: string;
+    touched?: boolean;
 }
 
 const FormTextarea: React.FC<FormTextareaProps> = ({
@@ -17,9 +21,13 @@ const FormTextarea: React.FC<FormTextareaProps> = ({
     required = false,
     rows = 3,
     disabled = false,
+    value,
+    onChange,
+    onBlur,
+    error,
+    touched,
 }) => {
-    const [field, meta] = useField(name);
-    const hasError = meta.touched && meta.error;
+    const hasError = touched && error;
 
     return (
         <div>
@@ -31,9 +39,12 @@ const FormTextarea: React.FC<FormTextareaProps> = ({
                 {required && <span className="text-red-500 ml-1">*</span>}
             </label>
             <textarea
-                {...field}
                 id={name}
+                name={name}
                 rows={rows}
+                value={value || ''}
+                onChange={onChange}
+                onBlur={onBlur}
                 placeholder={placeholder}
                 disabled={disabled}
                 className={`
@@ -45,7 +56,7 @@ const FormTextarea: React.FC<FormTextareaProps> = ({
         `}
             />
             {hasError && (
-                <p className="mt-1 text-sm text-red-600">{meta.error}</p>
+                <p className="mt-1 text-sm text-red-600">{error}</p>
             )}
         </div>
     );
