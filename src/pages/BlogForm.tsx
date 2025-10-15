@@ -66,7 +66,7 @@ const BlogForm: React.FC = () => {
 
             try {
                 const response = await blogsService.getBlog(id!);
-                const blog = response.blog;
+                const blog = response;
 
                 setInitialValues({
                     title: blog.title,

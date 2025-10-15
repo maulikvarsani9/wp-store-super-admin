@@ -21,7 +21,7 @@ export const blogsService = {
     const response = await apiClient.get<AxiosResponse>(
       apiEndpoints.blogs.getById(id)
     );
-    return response.data as Blog;
+    return response.data.blog as Blog;
   },
 
   // Create blog
