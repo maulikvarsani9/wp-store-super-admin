@@ -535,7 +535,7 @@ const Categories: React.FC = () => {
                 {data?.pagination && data.categories.length > 0 && (
                     <Pagination
                         currentPage={currentPage}
-                        totalPages={data.pagination.totalPages}
+                        pages={data.pagination.pages}
                         totalItems={data.pagination.totalCategories}
                         itemsPerPage={itemsPerPage}
                         onPageChange={(page) => setCurrentPage(page)}

@@ -204,7 +204,7 @@ const BlogList: React.FC = () => {
                     <div className="px-6 py-4 border-t border-gray-200">
                         <Pagination
                             currentPage={currentPage}
-                            totalPages={pagination.totalPages}
+                            pages={pagination.pages}
                             totalItems={pagination.total}
                             itemsPerPage={pagination.limit}
                             onPageChange={handlePageChange}
@@ -229,6 +229,7 @@ const BlogList: React.FC = () => {
 };
 
 export default BlogList;
+
 
 
 

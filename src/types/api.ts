@@ -4,7 +4,7 @@ export interface User {
   email?: string;
   phone?: string;
   profilePicture?: string; // Added missing property
-  role: 'superadmin' | 'admin' | 'merchant' | 'user';
+  role: "superadmin" | "admin" | "merchant" | "user";
   isActive: boolean;
   createdAt: string;
   updatedAt: string;
@@ -27,7 +27,7 @@ export interface CategoriesResponse {
   categories: Category[];
   pagination: {
     currentPage: number;
-    totalPages: number;
+    pages: number;
     totalCategories: number;
     limit: number;
   };
@@ -65,7 +65,7 @@ export interface AuthorsResponse {
     total: number;
     page: number;
     limit: number;
-    totalPages: number;
+    pages: number;
   };
 }
 
@@ -76,11 +76,13 @@ export interface Blog {
   content: string;
   mainImage: string;
   coverImage: string;
-  author: {
-    _id: string;
-    name: string;
-    image?: string;
-  } | string;
+  author:
+    | {
+        _id: string;
+        name: string;
+        image?: string;
+      }
+    | string;
   createdAt: string;
   updatedAt: string;
 }
@@ -91,7 +93,6 @@ export interface BlogsResponse {
     total: number;
     page: number;
     limit: number;
-    totalPages: number;
+    pages: number;
   };
 }
-

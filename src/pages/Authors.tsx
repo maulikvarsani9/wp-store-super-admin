@@ -269,7 +269,7 @@ const Authors: React.FC = () => {
             <div className="mt-6">
                 <Pagination
                     currentPage={pagination.page}
-                    totalPages={pagination.totalPages}
+                    pages={pagination.pages}
                     totalItems={pagination.total}
                     itemsPerPage={pagination.limit}
                     onPageChange={handlePageChange}

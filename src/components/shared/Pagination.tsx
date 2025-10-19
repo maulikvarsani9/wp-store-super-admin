@@ -3,7 +3,7 @@ import { FiChevronLeft, FiChevronRight } from 'react-icons/fi';
 
 interface PaginationProps {
     currentPage: number;
-    totalPages: number;
+    pages: number;
     totalItems: number;
     itemsPerPage: number;
     onPageChange: (page: number) => void;
@@ -12,7 +12,7 @@ interface PaginationProps {
 
 const Pagination: React.FC<PaginationProps> = ({
     currentPage,
-    totalPages,
+    pages,
     totalItems,
     itemsPerPage,
     onPageChange,
@@ -20,7 +20,7 @@ const Pagination: React.FC<PaginationProps> = ({
 }) => {
     // Handle undefined or invalid values
     const safeTotalItems = totalItems || 0;
-    const safeTotalPages = totalPages || 1;
+    const safeTotalPages = pages || 1;
     const safeCurrentPage = currentPage || 1;
     const safeItemsPerPage = itemsPerPage || 10;
 
